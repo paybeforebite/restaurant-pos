@@ -14,7 +14,7 @@ function moneyDate(value) {
   return Number.isNaN(date.getTime()) ? "—" : date.toLocaleDateString();
 }
 
-function statusLabel(status) {
+function planLabel(plan) {\n  return ({ starter: "Starter", basic: "Basic", pro: "Pro", business: "Business", enterprise: "Enterprise" })[plan] || plan;\n}\n\nfunction statusLabel(status) {
   return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
@@ -40,7 +40,7 @@ function renderCustomers() {
     <tr>
       <td><strong>${escapeHtml(customer.name)}</strong><div class="customer-slug">${escapeHtml(customer.slug)}</div></td>
       <td><strong>${escapeHtml(customer.owner_name || "—")}</strong><div class="customer-slug">${escapeHtml(customer.owner_email || "—")}</div></td>
-      <td><span class="plan-badge">${escapeHtml(customer.plan)}</span></td>
+      <td><span class="plan-badge">${escapeHtml(planLabel(customer.plan))}</span></td>
       <td><span class="status-badge status-${escapeHtml(customer.status)}">${escapeHtml(statusLabel(customer.status))}</span></td>
       <td>${moneyDate(customer.created_at)}</td>
       <td>${moneyDate(customer.activated_at)}</td>
