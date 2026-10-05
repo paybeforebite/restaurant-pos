@@ -242,9 +242,10 @@ h2 { margin-bottom: 5px; font-size: 19px; }
   transform: translateX(2px);
 }
 .sidebar-link.active {
-  background: #007C83;
-  border-color: #2B8E93;
-  color: #fff;
+  background: rgba(212, 160, 23, .10);
+  border-color: rgba(212, 160, 23, .55);
+  color: #D4A017;
+  font-weight: 800;
 }
 .sidebar-footer {
   margin-top: auto;
@@ -402,8 +403,15 @@ body:not(.sidebar-expanded) .management-page { margin-left: 70px; }
   color: #D4A017;
   fill: currentColor;
 }
-.sidebar-link:hover .sidebar-icon,
+.sidebar-link .sidebar-icon {
+  color: #FFFFFF;
+  stroke-width: 1.8;
+}
 .sidebar-link.active .sidebar-icon {
+  color: #D4A017;
+  stroke-width: 2.8;
+}
+.sidebar-link:hover:not(.active) .sidebar-icon {
   color: #FFFFFF;
 }
 .sidebar-link .sidebar-icon path {
