@@ -388,3 +388,135 @@ create policy usage_metrics_tenant_read on public.usage_metrics
     restaurant_id = public.current_restaurant_id()
     or public.is_platform_admin()
   );
+
+
+-- Subscription entitlement helpers used by the POS and future platform features.
+create or replace function public.current_subscription_plan_id()
+returns uuid
+language sql
+stable
+security definer
+set search_path=public
+as $$
+  select s.plan_id
+  from public.subscriptions s
+  where s.restaurant_id = public.current_restaurant_id()
+    and s.status in ('trialing','active','past_due','paused')
+    and (s.end_date is null or s.end_date >= now())
+  order by s.start_date desc
+  limit 1
+$$;
+
+create or replace function public.has_feature(feature_code text)
+returns boolean
+language sql
+stable
+security definer
+set search_path=public
+as $$
+  select coalesce(pf.enabled, false)
+  from public.plan_features pf
+  join public.features f on f.id = pf.feature_id
+  where pf.plan_id = public.current_subscription_plan_id()
+    and f.code = feature_code
+  limit 1
+$$;
+
+create or replace function public.get_feature_limit(feature_code text)
+returns bigint
+language sql
+stable
+security definer
+set search_path=public
+as $$
+  select pf.limit_value
+  from public.plan_features pf
+  join public.features f on f.id = pf.feature_id
+  where pf.plan_id = public.current_subscription_plan_id()
+    and f.code = feature_code
+  limit 1
+$$;
+
+-- Secure invoice creation with server-side daily plan-limit enforcement.
+-- The browser should call this function instead of inserting invoices directly.
+create or replace function public.create_invoice_with_items(
+  p_invoice_number text,
+  p_customer_name text,
+  p_subtotal numeric,
+  p_tax numeric,
+  p_total numeric,
+  p_items jsonb
+)
+returns public.invoices
+language plpgsql
+security definer
+set search_path=public
+as $$
+declare
+  v_restaurant_id uuid := public.current_restaurant_id();
+  v_invoice_limit bigint := public.get_feature_limit('daily_invoice_limit');
+  v_invoice_id uuid;
+  v_invoice public.invoices;
+  v_item jsonb;
+begin
+  if v_restaurant_id is null then
+    raise exception 'Restaurant membership is required.';
+  end if;
+
+  if not public.has_feature('billing') then
+    raise exception 'Billing is not available on the current plan.';
+  end if;
+
+  if v_invoice_limit is not null and (
+    select count(*)
+    from public.invoices
+    where restaurant_id = v_restaurant_id
+      and invoice_date >= current_date
+      and invoice_date < current_date + interval '1 day'
+  ) >= v_invoice_limit then
+    raise exception 'Daily invoice limit reached for your plan (% invoices/day).', v_invoice_limit;
+  end if;
+
+  insert into public.invoices (
+    restaurant_id, invoice_number, customer_name, subtotal, tax, total
+  )
+  values (
+    v_restaurant_id, p_invoice_number, p_customer_name, p_subtotal, p_tax, p_total
+  )
+  returning * into v_invoice;
+
+  v_invoice_id := v_invoice.id;
+
+  for v_item in select value from jsonb_array_elements(coalesce(p_items, '[]'::jsonb))
+  loop
+    insert into public.invoice_items (
+      restaurant_id,
+      invoice_id,
+      menu_item_id,
+      item_name,
+      quantity,
+      unit_price,
+      line_total,
+      food_type
+    )
+    values (
+      v_restaurant_id,
+      v_invoice_id,
+      (v_item->>'menu_item_id')::bigint,
+      v_item->>'item_name',
+      (v_item->>'quantity')::numeric,
+      (v_item->>'unit_price')::numeric,
+      (v_item->>'line_total')::numeric,
+      v_item->>'food_type'
+    );
+  end loop;
+
+  return v_invoice;
+exception
+  when others then
+    raise;
+end;
+$$;
+
+revoke all on function public.create_invoice_with_items(text,text,numeric,numeric,numeric,jsonb) from public;
+grant execute on function public.create_invoice_with_items(text,text,numeric,numeric,numeric,jsonb) to authenticated;
