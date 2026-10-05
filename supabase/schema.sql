@@ -103,33 +103,32 @@ alter table public.restaurant_members
 create index if not exists restaurants_status_idx on public.restaurants(status);
 create index if not exists restaurant_members_restaurant_idx on public.restaurant_members(restaurant_id);
 
--- Restaurant owners/admins can view the members of their own restaurant.
+
+-- Helper for role-aware UI/API access without recursive RLS evaluation.
+create or replace function public.current_restaurant_role()
+returns text
+language sql
+stable
+security definer
+set search_path=public
+as $$
+  select role
+  from public.restaurant_members
+  where user_id = auth.uid()
+    and is_active = true
+  limit 1
+$$;
+
 create policy restaurant_admin_member_read on public.restaurant_members
   for select to authenticated
   using (
     restaurant_id = public.current_restaurant_id()
-    and exists (
-      select 1
-      from public.restaurant_members me
-      where me.user_id = auth.uid()
-        and me.restaurant_id = public.restaurant_members.restaurant_id
-        and me.is_active = true
-        and me.role in ('owner','admin')
-    )
+    and public.current_restaurant_role() in ('owner','admin')
   );
 
--- Owners/admins can view their restaurant's onboarding status.
-drop policy if exists restaurant_admin_manage_read on public.restaurants;
 create policy restaurant_admin_manage_read on public.restaurants
   for select to authenticated
   using (
     id = public.current_restaurant_id()
-    and exists (
-      select 1
-      from public.restaurant_members me
-      where me.user_id = auth.uid()
-        and me.restaurant_id = public.restaurants.id
-        and me.is_active = true
-        and me.role in ('owner','admin')
-    )
+    and public.current_restaurant_role() in ('owner','admin')
   );
