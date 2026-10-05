@@ -3,7 +3,10 @@ const client=window.supabase&&config.url&&config.publishableKey?window.supabase.
 window.SUPABASE_CLIENT=client;
 
 function redirectToLogin(){
-  if(!window.location.pathname.endsWith("login.html")) window.location.replace("login.html");
+  if(window.location.pathname.endsWith("login.html")) return;
+  const page=window.location.pathname.split("/").pop()||"index.html";
+  const next=page==="customers.html"?"customers.html":"index.html";
+  window.location.replace("login.html?next="+encodeURIComponent(next));
 }
 
 async function loadRestaurantSession(){
@@ -22,6 +25,11 @@ async function loadRestaurantSession(){
 
   if(platformError) throw platformError;
   window.IS_PLATFORM_ADMIN=Boolean(platformAdmin);
+
+  if(window.location.pathname.endsWith("customers.html")&&!window.IS_PLATFORM_ADMIN){
+    window.location.replace("index.html");
+    return null;
+  }
 
   const {data:m,error:me}=await client
     .from("restaurant_members")
