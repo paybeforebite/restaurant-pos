@@ -69,7 +69,7 @@ async function saveMenuItem(item) {
     name: item.name,
     category: item.category,
     price: item.price,
-    icon: item.icon,
+    food_type: item.food_type,
     is_active: true
   };
 
@@ -86,7 +86,7 @@ async function saveMenuItem(item) {
     result = await supabaseClient
       .from("menu_items")
       .insert(payload)
-      .select("id,name,category,price,icon,is_active")
+      .select("id,name,category,price,food_type,is_active")
       .single();
   }
 
