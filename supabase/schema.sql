@@ -83,3 +83,53 @@ CREATE POLICY invoice_item_tenant_insert ON public.invoice_items
         AND i.restaurant_id = public.current_restaurant_id()
     )
   );
+
+
+-- PayBeforeBite customer onboarding
+alter table public.restaurants
+  add column if not exists status text not null default 'pending'
+    check (status in ('pending','active','suspended','cancelled')),
+  add column if not exists plan text not null default 'basic',
+  add column if not exists owner_name text,
+  add column if not exists owner_email text,
+  add column if not exists phone text,
+  add column if not exists activated_at timestamptz;
+
+alter table public.restaurant_members
+  add column if not exists invited_email text,
+  add column if not exists invited_at timestamptz,
+  add column if not exists activated_at timestamptz;
+
+create index if not exists restaurants_status_idx on public.restaurants(status);
+create index if not exists restaurant_members_restaurant_idx on public.restaurant_members(restaurant_id);
+
+-- Restaurant owners/admins can view the members of their own restaurant.
+create policy restaurant_admin_member_read on public.restaurant_members
+  for select to authenticated
+  using (
+    restaurant_id = public.current_restaurant_id()
+    and exists (
+      select 1
+      from public.restaurant_members me
+      where me.user_id = auth.uid()
+        and me.restaurant_id = public.restaurant_members.restaurant_id
+        and me.is_active = true
+        and me.role in ('owner','admin')
+    )
+  );
+
+-- Owners/admins can view their restaurant's onboarding status.
+drop policy if exists restaurant_admin_manage_read on public.restaurants;
+create policy restaurant_admin_manage_read on public.restaurants
+  for select to authenticated
+  using (
+    id = public.current_restaurant_id()
+    and exists (
+      select 1
+      from public.restaurant_members me
+      where me.user_id = auth.uid()
+        and me.restaurant_id = public.restaurants.id
+        and me.is_active = true
+        and me.role in ('owner','admin')
+    )
+  );
