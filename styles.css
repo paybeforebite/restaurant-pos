@@ -422,3 +422,27 @@ body:not(.sidebar-expanded) .management-page { margin-left: 70px; }
   height: 22px;
   flex: 0 0 22px;
 }
+
+
+/* Customer onboarding */
+.customer-admin-page { padding: 22px; max-width: 1400px; margin: auto; }
+.customer-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 22px auto 0; max-width: 1400px; padding: 0 22px; }
+.customer-stat { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: var(--shadow); }
+.customer-stat span { display: block; color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+.customer-stat strong { font-size: 25px; }
+.customer-slug { color: var(--muted); font-size: 11px; margin-top: 3px; }
+.plan-badge, .status-badge { display: inline-flex; align-items: center; border-radius: 999px; padding: 5px 9px; font-size: 11px; font-weight: 800; text-transform: capitalize; }
+.plan-badge { background: #EEF6F6; color: var(--accent-dark); }
+.status-pending { background: #FFF5D6; color: #8A6500; }
+.status-active { background: #E9F7EE; color: var(--success); }
+.status-suspended, .status-cancelled { background: #FDECEC; color: var(--danger); }
+.customer-empty { padding: 50px !important; text-align: center !important; color: var(--muted); }
+.onboarding-note { margin-bottom: 18px; padding: 12px 14px; background: #F4FAFA; border: 1px solid var(--border); border-radius: 10px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+
+@media (max-width: 900px) {
+  .customer-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 620px) {
+  .customer-stats { grid-template-columns: 1fr 1fr; padding: 0 12px; }
+  .customer-admin-page { padding: 12px; }
+}
