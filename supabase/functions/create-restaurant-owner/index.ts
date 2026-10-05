@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
     return json({ error: "Enter a valid owner email address." }, 400);
   }
 
-  if (!["basic", "pro", "enterprise"].includes(plan)) {
+  if (!["starter", "basic", "pro", "business", "enterprise"].includes(plan)) {
     return json({ error: "Invalid plan." }, 400);
   }
 
@@ -131,6 +131,35 @@ Deno.serve(async (req) => {
     await adminClient.auth.admin.deleteUser(invited.user.id);
     await adminClient.from("restaurants").delete().eq("id", restaurant.id);
     return json({ error: memberError.message }, 400);
+  }
+
+  const { data: selectedPlan, error: planError } = await adminClient
+    .from("plans")
+    .select("id")
+    .eq("code", plan)
+    .eq("is_active", true)
+    .single();
+
+  if (planError || !selectedPlan) {
+    await adminClient.auth.admin.deleteUser(invited.user.id);
+    await adminClient.from("restaurants").delete().eq("id", restaurant.id);
+    return json({ error: "The selected subscription plan is not available." }, 400);
+  }
+
+  const { error: subscriptionError } = await adminClient
+    .from("subscriptions")
+    .insert({
+      restaurant_id: restaurant.id,
+      plan_id: selectedPlan.id,
+      status: "active",
+      billing_cycle: "monthly",
+      start_date: new Date().toISOString(),
+    });
+
+  if (subscriptionError) {
+    await adminClient.auth.admin.deleteUser(invited.user.id);
+    await adminClient.from("restaurants").delete().eq("id", restaurant.id);
+    return json({ error: subscriptionError.message }, 400);
   }
 
   return json({
