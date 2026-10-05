@@ -1,16 +1,16 @@
 const DEFAULT_MENU = [
-  { id: 1, name: "Chicken Biriyani", category: "Main Course", price: 180, icon: "🍗" },
-  { id: 2, name: "Mutton Biriyani", category: "Main Course", price: 240, icon: "🍖" },
-  { id: 3, name: "Fish Curry", category: "Main Course", price: 150, icon: "🐟" },
-  { id: 4, name: "Chicken 65", category: "Starters", price: 140, icon: "🍗" },
-  { id: 5, name: "Paneer 65", category: "Starters", price: 130, icon: "🧀" },
-  { id: 6, name: "Veg Meals", category: "Meals", price: 120, icon: "🍛" },
-  { id: 7, name: "Parotta", category: "Breads", price: 25, icon: "🥞" },
-  { id: 8, name: "Chapati", category: "Breads", price: 30, icon: "🫓" },
-  { id: 9, name: "Curd Rice", category: "Meals", price: 80, icon: "🍚" },
-  { id: 10, name: "Fresh Lime", category: "Drinks", price: 50, icon: "🍋" },
-  { id: 11, name: "Coke", category: "Drinks", price: 40, icon: "🥤" },
-  { id: 12, name: "Water Bottle", category: "Drinks", price: 20, icon: "💧" }
+  { id: 1, name: "Chicken Biriyani", category: "Main Course", price: 180, food_type: "non_veg" },
+  { id: 2, name: "Mutton Biriyani", category: "Main Course", price: 240, food_type: "non_veg" },
+  { id: 3, name: "Fish Curry", category: "Main Course", price: 150, food_type: "non_veg" },
+  { id: 4, name: "Chicken 65", category: "Starters", price: 140, food_type: "non_veg" },
+  { id: 5, name: "Paneer 65", category: "Starters", price: 130, food_type: "veg" },
+  { id: 6, name: "Veg Meals", category: "Meals", price: 120, food_type: "veg" },
+  { id: 7, name: "Parotta", category: "Breads", price: 25, food_type: "veg" },
+  { id: 8, name: "Chapati", category: "Breads", price: 30, food_type: "veg" },
+  { id: 9, name: "Curd Rice", category: "Meals", price: 80, food_type: "veg" },
+  { id: 10, name: "Fresh Lime", category: "Drinks", price: 50, food_type: "veg" },
+  { id: 11, name: "Coke", category: "Drinks", price: 40, food_type: "veg" },
+  { id: 12, name: "Water Bottle", category: "Drinks", price: 20, food_type: "veg" }
 ];
 
 const MENU_STORAGE_KEY = "restaurantMenu";
@@ -49,7 +49,7 @@ async function loadMenu() {
 
   const { data, error } = await supabaseClient
     .from("menu_items")
-    .select("id,name,category,price,icon")
+    .select("id,name,category,price,food_type")
     .eq("restaurant_id", window.RESTAURANT_ID)
     .eq("is_active", true)
     .order("name");
@@ -103,7 +103,7 @@ function escapeHtml(value) {
 let currentInvoiceNumber = getCurrentInvoiceNumber();
 $("invoiceNumber").textContent = currentInvoiceNumber;
 
-function renderCategories() {
+function foodTypeIcon(foodType) {\n  return foodType === "non_veg" ? "🔴" : "🟢";\n}\n\nfunction foodTypeLabel(foodType) {\n  return foodType === "non_veg" ? "Non-Veg" : "Veg";\n}\n\nfunction renderCategories() {
   const categories = ["All", ...new Set(menu.map((item) => item.category))];
   if (!categories.includes(activeCategory)) activeCategory = "All";
 
@@ -228,7 +228,7 @@ async function saveInvoiceToSupabase(customer, subtotal, tax, total) {
     item_name: item.name,
     quantity: item.qty,
     unit_price: item.price,
-    line_total: Number((item.price * item.qty).toFixed(2))
+    line_total: Number((item.price * item.qty).toFixed(2)),\n    food_type: item.food_type
   }));
 
   const { error: itemsError } = await supabaseClient
