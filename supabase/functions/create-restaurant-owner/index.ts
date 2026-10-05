@@ -16,8 +16,10 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const publishableKey = Deno.env.get("SUPABASE_PUBLISHABLE_KEY");
-  const secretKey = Deno.env.get("SUPABASE_SECRET_KEY");
+  const publishableKeysRaw = Deno.env.get("SUPABASE_PUBLISHABLE_KEYS");
+  const secretKeysRaw = Deno.env.get("SUPABASE_SECRET_KEYS");
+  const publishableKey = publishableKeysRaw ? JSON.parse(publishableKeysRaw).default : Deno.env.get("SUPABASE_PUBLISHABLE_KEY");
+  const secretKey = secretKeysRaw ? JSON.parse(secretKeysRaw).default : Deno.env.get("SUPABASE_SECRET_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
   if (!supabaseUrl || !publishableKey || !secretKey) {
     return json({ error: "Supabase function secrets are not configured." }, 500);
@@ -96,7 +98,7 @@ Deno.serve(async (req) => {
     return json({ error: restaurantError.message }, 400);
   }
 
-  const siteUrl = Deno.env.get("SITE_URL") || "http://localhost:5500";
+  const siteUrl = Deno.env.get("SITE_URL") || req.headers.get("origin") || "http://localhost:5500";
   const redirectTo = new URL("update-password.html", siteUrl.endsWith("/") ? siteUrl : siteUrl + "/").href;
 
   const { data: invited, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(ownerEmail, {
