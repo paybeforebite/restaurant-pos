@@ -213,25 +213,7 @@ async function saveInvoiceToSupabase(customer, subtotal, tax, total) {
     throw new Error("Supabase is not configured. Invoice cannot be stored in the database.");
   }
 
-  const { data: invoice, error: invoiceError } = await supabaseClient
-    .from("invoices")
-    .insert({
-      restaurant_id: window.RESTAURANT_ID,
-      invoice_number: currentInvoiceNumber,
-      customer_name: customer,
-      subtotal,
-      tax,
-      total
-    })
-    .select("id,invoice_number,invoice_date")
-    .single();
-
-  if (invoiceError) {
-    throw invoiceError;
-  }
-
   const invoiceItems = cart.map((item) => ({
-    invoice_id: invoice.id,
     menu_item_id: item.id,
     item_name: item.name,
     quantity: item.qty,
@@ -240,17 +222,17 @@ async function saveInvoiceToSupabase(customer, subtotal, tax, total) {
     food_type: item.food_type
   }));
 
-  const { error: itemsError } = await supabaseClient
-    .from("invoice_items")
-    .insert(invoiceItems.map((item) => ({ ...item, restaurant_id: window.RESTAURANT_ID })));
+  const { data: invoice, error } = await supabaseClient.rpc("create_invoice_with_items", {
+    p_invoice_number: currentInvoiceNumber,
+    p_customer_name: customer,
+    p_subtotal: subtotal,
+    p_tax: tax,
+    p_total: total,
+    p_items: invoiceItems
+  });
 
-  if (itemsError) {
-    await supabaseClient
-      .from("invoices")
-      .delete()
-      .eq("id", invoice.id)
-      .eq("restaurant_id", window.RESTAURANT_ID);
-    throw itemsError;
+  if (error) {
+    throw error;
   }
 
   return invoice;
