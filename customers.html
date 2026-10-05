@@ -108,7 +108,13 @@
         <label>Owner name<input id="customerOwnerName" class="text-input" required></label>
         <label>Owner email<input id="customerOwnerEmail" class="text-input" type="email" autocomplete="email" required></label>
         <label>Phone<input id="customerPhone" class="text-input" type="tel"></label>
-        <label>Plan<select id="customerPlan" class="text-input"><option value="basic">Basic</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select></label>
+        <label>Plan<select id="customerPlan" class="text-input">
+          <option value="starter">Starter — ₹299/month</option>
+          <option value="basic">Basic — ₹599/month</option>
+          <option value="pro" selected>Pro — ₹999/month</option>
+          <option value="business">Business — ₹1,999/month</option>
+          <option value="enterprise">Enterprise — Custom</option>
+        </select></label>
       </div>
       <div class="form-actions">
         <button id="cancelCustomerBtn" class="secondary-btn" type="button">Cancel</button>
