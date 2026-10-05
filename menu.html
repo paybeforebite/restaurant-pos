@@ -93,8 +93,11 @@
             <input id="itemPrice" class="text-input" type="number" required min="0.01" step="0.01" placeholder="180" />
           </label>
           <label>
-            Icon / emoji
-            <input id="itemIcon" class="text-input" type="text" maxlength="4" placeholder="🍗" />
+            Food type
+            <select id="itemFoodType" class="text-input" required>
+              <option value="veg">🟢 Veg</option>
+              <option value="non_veg">🔴 Non-Veg</option>
+            </select>
           </label>
         </div>
         <datalist id="categoryOptions"></datalist>
