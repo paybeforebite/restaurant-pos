@@ -42,6 +42,11 @@ form.addEventListener("submit", async (event) => {
     const { error } = await client.auth.updateUser({ password: password.value });
     if (error) throw error;
 
+    const { error: activationError } = await client.functions.invoke("activate-restaurant-account");
+    if (activationError) {
+      console.warn("Password updated, but restaurant activation could not be completed.", activationError);
+    }
+
     message.className = "login-message success";
     message.textContent = "Password updated successfully. Redirecting to sign in...";
     form.reset();
