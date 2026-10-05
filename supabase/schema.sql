@@ -263,13 +263,22 @@ create table if not exists public.usage_metrics (
 create index if not exists usage_metrics_date_idx
   on public.usage_metrics(metric_date desc);
 
--- Initial PayBeforeBite plan catalog.
+-- PayBeforeBite production plan catalog.
+-- Prices are configurable in the platform catalog and are stored in INR.
 insert into public.plans(code, name, description, price_monthly, price_yearly, currency)
 values
-  ('basic', 'Basic', 'Core POS and billing features', 0, 0, 'INR'),
-  ('pro', 'Pro', 'Advanced POS, customer and reporting features', 0, 0, 'INR'),
-  ('enterprise', 'Enterprise', 'Advanced and custom business features', 0, 0, 'INR')
-on conflict (code) do nothing;
+  ('starter', 'Starter', 'Essential billing and menu management for small restaurants', 299, 2999, 'INR'),
+  ('basic', 'Basic', 'Customer management, exports and higher billing limits', 599, 5999, 'INR'),
+  ('pro', 'Pro', 'Advanced POS, inventory and reporting', 999, 9999, 'INR'),
+  ('business', 'Business', 'Multi-outlet, API and advanced operations', 1999, 19999, 'INR'),
+  ('enterprise', 'Enterprise', 'Custom enterprise capabilities and support', 0, 0, 'INR')
+on conflict (code) do update set
+  name = excluded.name,
+  description = excluded.description,
+  price_monthly = excluded.price_monthly,
+  price_yearly = excluded.price_yearly,
+  currency = excluded.currency,
+  updated_at = now();
 
 -- Feature catalog. Pricing is kept in plans; limits are configured in plan_features.
 insert into public.features(code, name, description, feature_type)
@@ -283,31 +292,48 @@ values
   ('excel_export', 'Excel/PDF Export', 'Export operational data and reports', 'boolean'),
   ('api_access', 'API Access', 'Access PayBeforeBite APIs', 'boolean'),
   ('multi_device', 'Multi-device POS', 'Use POS across multiple devices', 'boolean'),
+  ('multi_outlet', 'Multi-outlet', 'Manage multiple restaurant outlets', 'boolean'),
   ('staff_users', 'Staff Users', 'Maximum active restaurant staff users', 'limit'),
   ('daily_invoice_limit', 'Daily Invoice Limit', 'Maximum invoices that can be created per day', 'limit')
-on conflict (code) do nothing;
+on conflict (code) do update set
+  name = excluded.name,
+  description = excluded.description,
+  feature_type = excluded.feature_type;
 
--- Default entitlement matrix.
+-- Default entitlement matrix. This is an upsert so rerunning schema.sql keeps plan settings current.
 insert into public.plan_features(plan_id, feature_id, enabled, limit_value)
 select p.id, f.id,
        case
-         when p.code = 'basic' and f.code in ('billing','menu_management','dashboard','multi_device') then true
+         when p.code = 'starter' and f.code in ('billing','menu_management','dashboard') then true
+         when p.code = 'basic' and f.code in ('billing','menu_management','dashboard','customer_management','excel_export','multi_device') then true
          when p.code = 'pro' and f.code in ('billing','menu_management','dashboard','customer_management','inventory','advanced_reports','excel_export','multi_device') then true
+         when p.code = 'business' and f.code in ('billing','menu_management','dashboard','customer_management','inventory','advanced_reports','excel_export','api_access','multi_device','multi_outlet') then true
          when p.code = 'enterprise' then true
          else false
        end,
        case
-         when f.code = 'staff_users' and p.code = 'basic' then 2
+         when f.code = 'staff_users' and p.code = 'starter' then 2
+         when f.code = 'staff_users' and p.code = 'basic' then 5
          when f.code = 'staff_users' and p.code = 'pro' then 10
+         when f.code = 'staff_users' and p.code = 'business' then 25
          when f.code = 'staff_users' and p.code = 'enterprise' then null
-         when f.code = 'daily_invoice_limit' and p.code = 'basic' then 100
+         when f.code = 'daily_invoice_limit' and p.code = 'starter' then 100
+         when f.code = 'daily_invoice_limit' and p.code = 'basic' then 300
          when f.code = 'daily_invoice_limit' and p.code = 'pro' then 1000
+         when f.code = 'daily_invoice_limit' and p.code = 'business' then 5000
          when f.code = 'daily_invoice_limit' and p.code = 'enterprise' then null
          else null
        end
 from public.plans p
 cross join public.features f
-on conflict (plan_id, feature_id) do nothing;
+on conflict (plan_id, feature_id) do update set
+  enabled = excluded.enabled,
+  limit_value = excluded.limit_value;
+
+-- Keep the restaurant plan column aligned with the supported catalog.
+update public.restaurants
+set plan = 'basic'
+where plan is null or plan not in ('starter','basic','pro','business','enterprise');
 
 alter table public.plans enable row level security;
 alter table public.features enable row level security;
