@@ -27,6 +27,12 @@ async function loadRestaurantSession(){
   if(platformError) throw platformError;
   window.IS_PLATFORM_ADMIN=Boolean(platformAdmin);
 
+  document.querySelectorAll("[data-logout]").forEach(b=>b.addEventListener("click",async()=>{
+    b.disabled=true;
+    await client.auth.signOut();
+    location.replace("login.html");
+  }));
+
   const currentPage=window.location.pathname.split("/").pop()||"index.html";
   const platformPages=["platform-dashboard.html","customers.html","subscriptions.html","analytics.html","settings.html"];
 
@@ -69,12 +75,6 @@ async function loadRestaurantSession(){
   document.querySelectorAll("[data-user-email]").forEach(e=>e.textContent=session.user.email||"");
   document.querySelectorAll("[data-restaurant-name]").forEach(e=>e.textContent=window.RESTAURANT_NAME);
   document.querySelectorAll("[data-platform-admin]").forEach(e=>e.style.display=window.IS_PLATFORM_ADMIN?"flex":"none");
-
-  document.querySelectorAll("[data-logout]").forEach(b=>b.addEventListener("click",async()=>{
-    b.disabled=true;
-    await client.auth.signOut();
-    location.replace("login.html");
-  }));
 
   return session;
 }
