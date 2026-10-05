@@ -103,7 +103,13 @@ function escapeHtml(value) {
 let currentInvoiceNumber = getCurrentInvoiceNumber();
 $("invoiceNumber").textContent = currentInvoiceNumber;
 
-function foodTypeIcon(foodType) {\n  return foodType === "non_veg" ? "🔴" : "🟢";\n}\n\nfunction foodTypeLabel(foodType) {\n  return foodType === "non_veg" ? "Non-Veg" : "Veg";\n}\n\nfunction renderCategories() {
+function foodTypeIcon(foodType) {
+  return foodType === "non_veg" ? "🔴" : "🟢";
+}
+
+function foodTypeLabel(foodType) {
+  return foodType === "non_veg" ? "Non-Veg" : "Veg";
+}\n\nfunction renderCategories() {
   const categories = ["All", ...new Set(menu.map((item) => item.category))];
   if (!categories.includes(activeCategory)) activeCategory = "All";
 
@@ -134,7 +140,7 @@ function renderMenu() {
     ? items.map((item) => `
       <button class="menu-card" data-id="${item.id}" type="button">
         <h3>${escapeHtml(item.name)}</h3>
-        <div class="category">${escapeHtml(item.category)}</div>
+        <div class="category">${foodTypeIcon(item.food_type)} ${foodTypeLabel(item.food_type)} · ${escapeHtml(item.category)}</div>
         <div class="price">${money(item.price)}</div>
       </button>
     `).join("")
@@ -228,7 +234,8 @@ async function saveInvoiceToSupabase(customer, subtotal, tax, total) {
     item_name: item.name,
     quantity: item.qty,
     unit_price: item.price,
-    line_total: Number((item.price * item.qty).toFixed(2)),\n    food_type: item.food_type
+    line_total: Number((item.price * item.qty).toFixed(2)),
+    food_type: item.food_type
   }));
 
   const { error: itemsError } = await supabaseClient
