@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
     return json({ error: restaurantError.message }, 400);
   }
 
-  const siteUrl = Deno.env.get("SITE_URL") || req.headers.get("origin") || "http://localhost:5500";
+  const siteUrl = "https://paybeforebite.github.io/restaurant-pos";
   const redirectTo = new URL("update-password.html", siteUrl.endsWith("/") ? siteUrl : siteUrl + "/").href;
 
   const { data: invited, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(ownerEmail, {
