@@ -99,3 +99,49 @@ No build tools are required.
 - Multi-device billing
 - Cloud invoice history
 - Backup and reporting
+
+
+## PayBeforeBite customer onboarding
+
+The production onboarding flow is:
+
+1. A PayBeforeBite platform administrator signs in.
+2. **Customers** → **Create Restaurant**.
+3. Enter the restaurant and owner details.
+4. The server-side Supabase Edge Function creates the restaurant, creates the owner invitation and creates the restaurant member record.
+5. The owner receives an activation email.
+6. The owner opens the activation link and creates their own password.
+7. The activation function changes the restaurant status from pending to active.
+8. The owner can then sign in to the Restaurant POS.
+
+### First platform administrator
+
+After running `supabase/schema.sql`, add your first platform administrator from the Supabase SQL Editor using the user's Auth UUID:
+
+```sql
+insert into public.platform_admins (user_id)
+values ('YOUR_AUTH_USER_UUID')
+on conflict (user_id) do update set is_active = true;
+```
+
+### Edge Functions
+
+The onboarding functions are stored under:
+
+- `supabase/functions/create-restaurant-owner/index.ts`
+- `supabase/functions/list-customers/index.ts`
+- `supabase/functions/activate-restaurant-account/index.ts`
+
+Deploy them with the Supabase CLI:
+
+```bash
+supabase functions deploy create-restaurant-owner
+supabase functions deploy list-customers
+supabase functions deploy activate-restaurant-account
+```
+
+The functions require the Supabase project URL, publishable key and secret key in the Edge Function environment. **Never put the secret key in browser code.**
+
+Set `SITE_URL` to the production website URL used by the activation email. Add the exact `update-password.html` URL to Supabase Authentication → URL Configuration → Redirect URLs.
+
+Supabase Auth invitation emails are sent by the Auth Admin `inviteUserByEmail()` flow, which must run in a trusted server environment.
