@@ -376,3 +376,37 @@ body:not(.sidebar-expanded) .management-page { margin-left: 70px; }
 .sidebar-logout-icon { display: inline; line-height: 1; }
 .sidebar-logout-text { display: inline; }
 .app-sidebar.collapsed .sidebar-logout-text { display: none; }
+
+
+/* Profile */
+.profile-page { padding: 22px; max-width: 1100px; margin: auto; }
+.profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.profile-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); padding: 24px; }
+.profile-summary { grid-column: 1 / -1; display: flex; align-items: center; gap: 18px; }
+.profile-avatar { width: 64px; height: 64px; flex: 0 0 64px; display: grid; place-items: center; border-radius: 18px; background: var(--accent); color: #fff; font-size: 24px; font-weight: 800; }
+.profile-summary h2 { margin: 0 0 5px; font-size: 20px; word-break: break-word; }
+.profile-muted, .profile-card-header p:not(.eyebrow) { color: var(--muted); font-size: 13px; margin: 0; }
+.profile-card-header { margin-bottom: 18px; }
+.profile-card-header h2 { margin-bottom: 5px; }
+.profile-details { display: grid; gap: 0; }
+.profile-details div { display: flex; justify-content: space-between; gap: 20px; padding: 13px 0; border-bottom: 1px solid var(--border); }
+.profile-details div:last-child { border-bottom: 0; }
+.profile-details span { color: var(--muted); font-size: 13px; }
+.profile-details strong { text-align: right; font-size: 13px; overflow-wrap: anywhere; }
+.profile-form { display: grid; gap: 14px; }
+.profile-form label { display: grid; gap: 7px; font-size: 12px; font-weight: 800; }
+.profile-form .text-input { margin: 0; }
+.profile-form-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 4px; }
+.profile-form-actions .primary-btn, .profile-form-actions .secondary-btn { min-height: 42px; }
+.login-links { display: flex; justify-content: center; margin-top: 18px; }
+.login-links a { color: var(--accent); font-size: 13px; font-weight: 700; text-decoration: none; }
+.login-links a:hover { text-decoration: underline; }
+.login-message.success { color: var(--success); }
+
+@media (max-width: 760px) {
+  .profile-page { padding: 12px; }
+  .profile-grid { grid-template-columns: 1fr; }
+  .profile-summary { grid-column: auto; }
+  .profile-details div { align-items: flex-start; flex-direction: column; gap: 4px; }
+  .profile-details strong { text-align: left; }
+}
