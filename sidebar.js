@@ -1,5 +1,5 @@
-const sidebarToggle = document.getElementById("sidebarToggle");
 const sidebar = document.getElementById("appSidebar");
+const sidebarLogo = document.querySelector(".sidebar-logo");
 const sidebarOverlay = document.getElementById("sidebarOverlay");
 const SIDEBAR_STATE_KEY = "restaurantSidebarExpanded";
 
@@ -8,9 +8,17 @@ function setSidebarState(expanded) {
   sidebar.classList.toggle("collapsed", !expanded);
   document.body.classList.toggle("sidebar-expanded", expanded);
   localStorage.setItem(SIDEBAR_STATE_KEY, String(expanded));
-  if (sidebarToggle) {
-    sidebarToggle.setAttribute("aria-expanded", String(expanded));
-    sidebarToggle.setAttribute("aria-label", expanded ? "Collapse navigation" : "Expand navigation");
+
+  if (sidebarLogo) {
+    sidebarLogo.setAttribute("aria-expanded", String(expanded));
+    sidebarLogo.setAttribute(
+      "aria-label",
+      expanded ? "Collapse navigation" : "Expand navigation"
+    );
+    sidebarLogo.setAttribute(
+      "title",
+      expanded ? "Collapse navigation" : "Expand navigation"
+    );
   }
 }
 
@@ -18,6 +26,21 @@ function closeMobileSidebar() {
   if (!sidebar) return;
   sidebar.classList.remove("mobile-open");
   if (sidebarOverlay) sidebarOverlay.classList.remove("visible");
+}
+
+function toggleSidebar() {
+  if (!sidebar) return;
+
+  if (window.matchMedia("(max-width: 760px)").matches) {
+    sidebar.classList.toggle("mobile-open");
+    sidebarOverlay?.classList.toggle(
+      "visible",
+      sidebar.classList.contains("mobile-open")
+    );
+    return;
+  }
+
+  setSidebarState(sidebar.classList.contains("collapsed"));
 }
 
 function initSidebar() {
@@ -32,13 +55,12 @@ function initSidebar() {
     link.classList.toggle("active", link.getAttribute("href") === currentPage);
   });
 
-  sidebarToggle?.addEventListener("click", () => {
-    if (window.matchMedia("(max-width: 760px)").matches) {
-      sidebar.classList.toggle("mobile-open");
-      sidebarOverlay?.classList.toggle("visible", sidebar.classList.contains("mobile-open"));
-      return;
+  sidebarLogo?.addEventListener("click", toggleSidebar);
+  sidebarLogo?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      toggleSidebar();
     }
-    setSidebarState(sidebar.classList.contains("collapsed"));
   });
 
   sidebarOverlay?.addEventListener("click", closeMobileSidebar);
@@ -47,11 +69,7 @@ function initSidebar() {
     link.addEventListener("click", () => {
       if (window.matchMedia("(max-width: 760px)").matches) {
         closeMobileSidebar();
-        return;
       }
-
-      // Collapse the sidebar after navigating to another component.
-      setSidebarState(false);
     });
   });
 
