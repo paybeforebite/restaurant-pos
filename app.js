@@ -109,7 +109,9 @@ function foodTypeIcon(foodType) {
 
 function foodTypeLabel(foodType) {
   return foodType === "non_veg" ? "Non-Veg" : "Veg";
-}\n\nfunction renderCategories() {
+}
+
+function renderCategories() {
   const categories = ["All", ...new Set(menu.map((item) => item.category))];
   if (!categories.includes(activeCategory)) activeCategory = "All";
 
