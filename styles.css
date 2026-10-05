@@ -391,3 +391,26 @@ body:not(.sidebar-expanded) .management-page { margin-left: 70px; }
   .profile-details div { align-items: flex-start; flex-direction: column; gap: 4px; }
   .profile-details strong { text-align: left; }
 }
+
+
+/* Monochrome sidebar icons */
+.sidebar-icon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  display: block;
+  color: #D4A017;
+  fill: currentColor;
+}
+.sidebar-link:hover .sidebar-icon,
+.sidebar-link.active .sidebar-icon {
+  color: #FFFFFF;
+}
+.sidebar-link .sidebar-icon path {
+  fill: currentColor;
+}
+.app-sidebar.collapsed .sidebar-icon {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+}
