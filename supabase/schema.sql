@@ -132,3 +132,37 @@ create policy restaurant_admin_manage_read on public.restaurants
     id = public.current_restaurant_id()
     and public.current_restaurant_role() in ('owner','admin')
   );
+
+
+-- PayBeforeBite platform admin
+create table if not exists public.platform_admins (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  is_active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+alter table public.platform_admins enable row level security;
+
+drop policy if exists platform_admin_self_read on public.platform_admins;
+create policy platform_admin_self_read on public.platform_admins
+  for select to authenticated
+  using (user_id = auth.uid() and is_active = true);
+
+create or replace function public.is_platform_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path=public
+as $$
+  select exists (
+    select 1
+    from public.platform_admins
+    where user_id = auth.uid()
+      and is_active = true
+  )
+$$;
+
+create index if not exists platform_admins_active_idx
+  on public.platform_admins(user_id)
+  where is_active = true;
