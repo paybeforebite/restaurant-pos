@@ -3,11 +3,11 @@ const client=window.supabase&&config.url&&config.publishableKey?window.supabase.
 window.SUPABASE_CLIENT=client;
 
 function redirectToLogin(){
-  if(window.location.pathname.endsWith("login.html")) return;
+  if(window.location.pathname.endsWith("index.html")) return;
   const page=window.location.pathname.split("/").pop()||"index.html";
   const platformPages=["platform-dashboard.html","customers.html","subscriptions.html","analytics.html","settings.html"];
-  const next=platformPages.includes(page)?page:"index.html";
-  window.location.replace("login.html?next="+encodeURIComponent(next));
+  const next=platformPages.includes(page)?page:"dashboard.html";
+  window.location.replace("index.html?next="+encodeURIComponent(next));
 }
 
 async function loadRestaurantSession(){
@@ -30,7 +30,7 @@ async function loadRestaurantSession(){
   document.querySelectorAll("[data-logout]").forEach(b=>b.addEventListener("click",async()=>{
     b.disabled=true;
     await client.auth.signOut();
-    location.replace("login.html");
+    location.replace("index.html");
   }));
 
   const currentPage=window.location.pathname.split("/").pop()||"index.html";
