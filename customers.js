@@ -14,7 +14,11 @@ function moneyDate(value) {
   return Number.isNaN(date.getTime()) ? "—" : date.toLocaleDateString();
 }
 
-function planLabel(plan) {\n  return ({ starter: "Starter", basic: "Basic", pro: "Pro", business: "Business", enterprise: "Enterprise" })[plan] || plan;\n}\n\nfunction statusLabel(status) {
+function planLabel(plan) {
+  return ({ starter: "Starter", basic: "Basic", pro: "Pro", business: "Business", enterprise: "Enterprise" })[plan] || plan;
+}
+
+function statusLabel(status) {
   return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
