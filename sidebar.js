@@ -1,7 +1,7 @@
 const sidebar = document.getElementById("appSidebar");
 const sidebarLogo = document.querySelector(".sidebar-logo");
 const sidebarOverlay = document.getElementById("sidebarOverlay");
-const SIDEBAR_STATE_KEY = "restaurantSidebarExpanded";
+const SIDEBAR_STATE_KEY = "restaurantSidebarExpandedV2";
 
 function ensureMobileMenuButton() {
   if (document.getElementById("mobileMenuButton")) return;
