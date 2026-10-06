@@ -18,6 +18,7 @@ const allowedNext = [
   "settings.html",
   "index.html",
   "dashboard.html",
+  "billing.html",
   "menu.html",
   "restaurant-customers.html",
   "staff.html",
