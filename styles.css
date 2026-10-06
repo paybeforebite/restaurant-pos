@@ -298,8 +298,56 @@ body:not(.sidebar-expanded) .platform-page,
 body:not(.sidebar-expanded) .customer-admin-page { margin-left: 70px; }
 
 @media (max-width: 760px) {
-  .app-sidebar {
+  /* Mobile navigation stays fully expanded when opened. */
+  .app-sidebar,
+  .app-sidebar.collapsed {
     width: 238px;
+    padding: 18px 12px;
+  }
+  .app-sidebar.collapsed .sidebar-brand-text,
+  .app-sidebar.collapsed .sidebar-link > span:last-child,
+  .app-sidebar.collapsed .sidebar-footer > span:last-child {
+    display: initial;
+  }
+  .app-sidebar.collapsed .sidebar-brand,
+  .app-sidebar.collapsed .sidebar-link,
+  .app-sidebar.collapsed .sidebar-footer {
+    justify-content: initial;
+  }
+  .app-sidebar.collapsed .sidebar-brand {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .app-sidebar.collapsed .sidebar-link {
+    padding: 10px 14px;
+    justify-content: flex-start;
+  }
+  .app-sidebar.collapsed .sidebar-icon {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    font-size: 16px;
+  }
+  .app-sidebar .sidebar-link {
+    min-height: 44px;
+  }
+  .app-sidebar .sidebar-brand-text {
+    min-width: 0;
+  }
+  .app-sidebar .sidebar-brand-text strong,
+  .app-sidebar .sidebar-brand-text span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .app-sidebar .sidebar-link > span:last-child {
+    display: inline;
+  }
+  .app-sidebar .sidebar-footer > span:last-child {
+    display: initial;
+  }
+
+  .app-sidebar {
+    transform: translateX(-100%);
     transform: translateX(-100%);
   }
   .app-sidebar.mobile-open { transform: translateX(0); }
