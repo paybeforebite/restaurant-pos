@@ -27,10 +27,9 @@ const allowedNext = [
   "subscription.html"
 ];
 
-const requestedNext = new URLSearchParams(window.location.search).get("next");
-const nextPage = allowedNext.includes(requestedNext)
-  ? requestedNext
-  : "index.html";
+const storedNext = sessionStorage.getItem("paybeforebite_requested_page");
+const requestedNext = allowedNext.includes(storedNext) ? storedNext : null;
+const nextPage = requestedNext || "index.html";
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -54,6 +53,7 @@ form.addEventListener("submit", async (event) => {
     }
 
     if (requestedNext) {
+      sessionStorage.removeItem("paybeforebite_requested_page");
       window.location.replace(nextPage);
       return;
     }
