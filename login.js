@@ -43,7 +43,7 @@ form.addEventListener("submit", async (event) => {
       throw new Error("Supabase is not configured.");
     }
 
-    const { error } = await client.auth.signInWithPassword({
+    const { data, error } = await client.auth.signInWithPassword({
       email: emailInput.value.trim(),
       password: passwordInput.value
     });
