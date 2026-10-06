@@ -3,6 +3,32 @@ const sidebarLogo = document.querySelector(".sidebar-logo");
 const sidebarOverlay = document.getElementById("sidebarOverlay");
 const SIDEBAR_STATE_KEY = "restaurantSidebarExpanded";
 
+function ensureMobileMenuButton() {
+  if (document.getElementById("mobileMenuButton")) return;
+
+  const button = document.createElement("button");
+  button.id = "mobileMenuButton";
+  button.className = "mobile-menu-button";
+  button.type = "button";
+  button.setAttribute("aria-label", "Open navigation menu");
+  button.setAttribute("aria-controls", "appSidebar");
+  button.setAttribute("aria-expanded", "false");
+  button.innerHTML = '<span aria-hidden="true">☰</span>';
+  document.body.appendChild(button);
+
+  button.addEventListener("click", toggleSidebar);
+}
+
+function setMobileMenuState(open) {
+  const button = document.getElementById("mobileMenuButton");
+  if (!button) return;
+  button.setAttribute("aria-expanded", String(open));
+  button.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
+  button.innerHTML = open
+    ? '<span aria-hidden="true">×</span>'
+    : '<span aria-hidden="true">☰</span>';
+}
+
 function setSidebarState(expanded) {
   if (!sidebar) return;
   sidebar.classList.toggle("collapsed", !expanded);
@@ -26,17 +52,17 @@ function closeMobileSidebar() {
   if (!sidebar) return;
   sidebar.classList.remove("mobile-open");
   if (sidebarOverlay) sidebarOverlay.classList.remove("visible");
+  setMobileMenuState(false);
 }
 
 function toggleSidebar() {
   if (!sidebar) return;
 
   if (window.matchMedia("(max-width: 760px)").matches) {
-    sidebar.classList.toggle("mobile-open");
-    sidebarOverlay?.classList.toggle(
-      "visible",
-      sidebar.classList.contains("mobile-open")
-    );
+    const open = !sidebar.classList.contains("mobile-open");
+    sidebar.classList.toggle("mobile-open", open);
+    sidebarOverlay?.classList.toggle("visible", open);
+    setMobileMenuState(open);
     return;
   }
 
@@ -45,6 +71,8 @@ function toggleSidebar() {
 
 function initSidebar() {
   if (!sidebar) return;
+
+  ensureMobileMenuButton();
 
   const savedState = localStorage.getItem(SIDEBAR_STATE_KEY);
   const isMobile = window.matchMedia("(max-width: 760px)").matches;
@@ -73,11 +101,19 @@ function initSidebar() {
     });
   });
 
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && window.matchMedia("(max-width: 760px)").matches) {
+      closeMobileSidebar();
+    }
+  });
+
   window.addEventListener("resize", () => {
     if (!window.matchMedia("(max-width: 760px)").matches) {
       closeMobileSidebar();
       const expanded = localStorage.getItem(SIDEBAR_STATE_KEY);
       setSidebarState(expanded !== "false");
+    } else {
+      setMobileMenuState(sidebar.classList.contains("mobile-open"));
     }
   });
 }
