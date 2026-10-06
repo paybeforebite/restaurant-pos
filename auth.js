@@ -112,7 +112,7 @@ async function loadRestaurantSession(){
   }
 
   window.RESTAURANT_ID=m.restaurant_id;
-  window.RESTAURANT_ROLE=m.role;
+  window.RESTAURANT_ROLE=String(m.role||"").trim().toLowerCase();
   window.RESTAURANT_NAME=m.restaurants?.name||"Restaurant";
 
   document.querySelectorAll("[data-user-email]").forEach(e=>e.textContent=session.user.email||"");
@@ -121,7 +121,7 @@ async function loadRestaurantSession(){
 
   // Restaurant routes require an active restaurant membership.
   if(RESTAURANT_PAGES.includes(page)){
-    if(OWNER_ADMIN_PAGES.includes(page)&&!["owner","admin"].includes(m.role)){
+    if(OWNER_ADMIN_PAGES.includes(page)&&!["owner","admin"].includes(window.RESTAURANT_ROLE)){
       redirectAfterDenied();
       return null;
     }
