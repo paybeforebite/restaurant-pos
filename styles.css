@@ -180,7 +180,7 @@ h2 { margin-bottom: 5px; font-size: 19px; }
   transition: width .22s ease, transform .22s ease;
   box-shadow: 8px 0 24px rgba(15, 23, 42, .12);
 }
-.app-sidebar.collapsed { width: 70px; }
+.app-sidebar.collapsed { width: 60px; }
 .sidebar-brand {
   min-height: 48px;
   display: flex;
