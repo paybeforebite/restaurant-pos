@@ -111,7 +111,8 @@ h2 { margin-bottom: 5px; font-size: 19px; }
 
 /* Menu management */
 .management-page { padding: 22px; max-width: 1250px; margin: auto; }
-.management-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); padding: 24px; }
+.management-panel {
+  margin-top: 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); padding: 24px; }
 .management-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; }
 .management-header p { color: var(--muted); margin-bottom: 0; font-size: 13px; }
 .management-toolbar { display: flex; gap: 12px; margin-bottom: 18px; }
