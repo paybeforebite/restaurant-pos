@@ -450,7 +450,7 @@ body:not(.sidebar-expanded) .customer-admin-page { margin-left: 70px; }
 }
 
 /* Platform admin pages */
-.platform-page { padding: 22px; max-width: 1400px; margin: auto; }
+.platform-page { padding: 22px; max-width: none; width: calc(100% - 238px); margin: 0 0 0 238px; transition: margin-left .22s ease, width .22s ease; }
 .platform-hero { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); padding: 26px; }
 .platform-hero h2 { margin-bottom: 8px; font-size: 22px; }
 .platform-hero p { color: var(--muted); max-width: 760px; line-height: 1.6; }
@@ -460,7 +460,7 @@ body:not(.sidebar-expanded) .customer-admin-page { margin-left: 70px; }
 .platform-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
 .platform-coming-soon { display: inline-flex; margin-top: 12px; padding: 5px 9px; border-radius: 999px; background: #FFF5D6; color: #8A6500; font-size: 10px; font-weight: 800; text-transform: uppercase; }
 @media (max-width: 900px) { .platform-card-grid { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 620px) { .platform-page { padding: 12px; } .platform-card-grid { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .platform-page { width: calc(100% - 238px); margin-left: 238px; } }\n@media (max-width: 760px) { .platform-page, body:not(.sidebar-expanded) .platform-page { width: 100%; margin-left: 0; } }\n@media (max-width: 620px) { .platform-page { padding: 12px; } .platform-card-grid { grid-template-columns: 1fr; } }
 
 
 /* Subscription plan management */
