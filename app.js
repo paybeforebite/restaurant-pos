@@ -1,16 +1,16 @@
 const DEFAULT_MENU = [
-  { id: 1, name: "Chicken Biriyani", category: "Main Course", price: 180, icon: "🍗" },
-  { id: 2, name: "Mutton Biriyani", category: "Main Course", price: 240, icon: "🍖" },
-  { id: 3, name: "Fish Curry", category: "Main Course", price: 150, icon: "🐟" },
-  { id: 4, name: "Chicken 65", category: "Starters", price: 140, icon: "🍗" },
-  { id: 5, name: "Paneer 65", category: "Starters", price: 130, icon: "🧀" },
-  { id: 6, name: "Veg Meals", category: "Meals", price: 120, icon: "🍛" },
-  { id: 7, name: "Parotta", category: "Breads", price: 25, icon: "🥞" },
-  { id: 8, name: "Chapati", category: "Breads", price: 30, icon: "🫓" },
-  { id: 9, name: "Curd Rice", category: "Meals", price: 80, icon: "🍚" },
-  { id: 10, name: "Fresh Lime", category: "Drinks", price: 50, icon: "🍋" },
-  { id: 11, name: "Coke", category: "Drinks", price: 40, icon: "🥤" },
-  { id: 12, name: "Water Bottle", category: "Drinks", price: 20, icon: "💧" }
+  { id: 1, name: "Chicken Biriyani", category: "Main Course", price: 180, food_type: "non_veg" },
+  { id: 2, name: "Mutton Biriyani", category: "Main Course", price: 240, food_type: "non_veg" },
+  { id: 3, name: "Fish Curry", category: "Main Course", price: 150, food_type: "non_veg" },
+  { id: 4, name: "Chicken 65", category: "Starters", price: 140, food_type: "non_veg" },
+  { id: 5, name: "Paneer 65", category: "Starters", price: 130, food_type: "veg" },
+  { id: 6, name: "Veg Meals", category: "Meals", price: 120, food_type: "veg" },
+  { id: 7, name: "Parotta", category: "Breads", price: 25, food_type: "veg" },
+  { id: 8, name: "Chapati", category: "Breads", price: 30, food_type: "veg" },
+  { id: 9, name: "Curd Rice", category: "Meals", price: 80, food_type: "veg" },
+  { id: 10, name: "Fresh Lime", category: "Drinks", price: 50, food_type: "veg" },
+  { id: 11, name: "Coke", category: "Drinks", price: 40, food_type: "veg" },
+  { id: 12, name: "Water Bottle", category: "Drinks", price: 20, food_type: "veg" }
 ];
 
 const MENU_STORAGE_KEY = "restaurantMenu";
@@ -49,7 +49,7 @@ async function loadMenu() {
 
   const { data, error } = await supabaseClient
     .from("menu_items")
-    .select("id,name,category,price,icon")
+    .select("id,name,category,price,food_type")
     .eq("restaurant_id", window.RESTAURANT_ID)
     .eq("is_active", true)
     .order("name");
@@ -103,6 +103,14 @@ function escapeHtml(value) {
 let currentInvoiceNumber = getCurrentInvoiceNumber();
 $("invoiceNumber").textContent = currentInvoiceNumber;
 
+function foodTypeIcon(foodType) {
+  return foodType === "non_veg" ? "🔴" : "🟢";
+}
+
+function foodTypeLabel(foodType) {
+  return foodType === "non_veg" ? "Non-Veg" : "Veg";
+}
+
 function renderCategories() {
   const categories = ["All", ...new Set(menu.map((item) => item.category))];
   if (!categories.includes(activeCategory)) activeCategory = "All";
@@ -134,7 +142,7 @@ function renderMenu() {
     ? items.map((item) => `
       <button class="menu-card" data-id="${item.id}" type="button">
         <h3>${escapeHtml(item.name)}</h3>
-        <div class="category">${escapeHtml(item.category)}</div>
+        <div class="category">${foodTypeIcon(item.food_type)} ${foodTypeLabel(item.food_type)} · ${escapeHtml(item.category)}</div>
         <div class="price">${money(item.price)}</div>
       </button>
     `).join("")
@@ -205,43 +213,26 @@ async function saveInvoiceToSupabase(customer, subtotal, tax, total) {
     throw new Error("Supabase is not configured. Invoice cannot be stored in the database.");
   }
 
-  const { data: invoice, error: invoiceError } = await supabaseClient
-    .from("invoices")
-    .insert({
-      restaurant_id: window.RESTAURANT_ID,
-      invoice_number: currentInvoiceNumber,
-      customer_name: customer,
-      subtotal,
-      tax,
-      total
-    })
-    .select("id,invoice_number,invoice_date")
-    .single();
-
-  if (invoiceError) {
-    throw invoiceError;
-  }
-
   const invoiceItems = cart.map((item) => ({
-    invoice_id: invoice.id,
     menu_item_id: item.id,
     item_name: item.name,
     quantity: item.qty,
     unit_price: item.price,
-    line_total: Number((item.price * item.qty).toFixed(2))
+    line_total: Number((item.price * item.qty).toFixed(2)),
+    food_type: item.food_type
   }));
 
-  const { error: itemsError } = await supabaseClient
-    .from("invoice_items")
-    .insert(invoiceItems.map((item) => ({ ...item, restaurant_id: window.RESTAURANT_ID })));
+  const { data: invoice, error } = await supabaseClient.rpc("create_invoice_with_items", {
+    p_invoice_number: currentInvoiceNumber,
+    p_customer_name: customer,
+    p_subtotal: subtotal,
+    p_tax: tax,
+    p_total: total,
+    p_items: invoiceItems
+  });
 
-  if (itemsError) {
-    await supabaseClient
-      .from("invoices")
-      .delete()
-      .eq("id", invoice.id)
-      .eq("restaurant_id", window.RESTAURANT_ID);
-    throw itemsError;
+  if (error) {
+    throw error;
   }
 
   return invoice;

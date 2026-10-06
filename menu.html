@@ -11,22 +11,22 @@
   <div class="app-shell">
     <aside id="appSidebar" class="app-sidebar" aria-label="Main navigation">
   <div class="sidebar-brand">
-    <div class="sidebar-logo">🍽️</div>
+    <button class="sidebar-logo" type="button" aria-expanded="true" aria-label="Collapse navigation" title="Collapse navigation">🍽️</button>
     <div class="sidebar-brand-text">
       <strong>Restaurant POS</strong>
       <span>Billing System</span>
     </div>
   </div>
 
-  <button id="sidebarToggle" class="sidebar-toggle" type="button" aria-expanded="true" aria-label="Collapse navigation">
-    <span>☰</span>
-    <span class="sidebar-toggle-text">Collapse</span>
-  </button>
-
   <nav class="sidebar-nav">
-    <a class="sidebar-link" href="index.html"><span class="sidebar-icon">🧾</span><span>Billing</span></a>
-    <a class="sidebar-link" href="dashboard.html"><span class="sidebar-icon">📊</span><span>Dashboard</span></a>
-    <a class="sidebar-link" href="menu.html"><span class="sidebar-icon">🍴</span><span>Manage Menu</span></a>
+    <a class="sidebar-link" href="dashboard.html"><span class="sidebar-icon">⌂</span><span>Dashboard</span></a>
+    <a class="sidebar-link" href="index.html"><span class="sidebar-icon">▣</span><span>Billing</span></a>
+    <a class="sidebar-link" href="menu.html"><span class="sidebar-icon">☷</span><span>Menu</span></a>
+    <a class="sidebar-link" href="restaurant-customers.html"><span class="sidebar-icon">◉</span><span>Customers</span></a>
+    <a class="sidebar-link" href="staff.html"><span class="sidebar-icon">♟</span><span>Staff</span></a>
+    <a class="sidebar-link" href="reports.html"><span class="sidebar-icon">▥</span><span>Reports</span></a>
+    <a class="sidebar-link" href="profile.html"><span class="sidebar-icon">●</span><span>Profile / Settings</span></a>
+    <a class="sidebar-link" href="subscription.html"><span class="sidebar-icon">▤</span><span>Subscription</span></a>
   </nav>
 
   <div class="sidebar-footer">
@@ -93,8 +93,11 @@
             <input id="itemPrice" class="text-input" type="number" required min="0.01" step="0.01" placeholder="180" />
           </label>
           <label>
-            Icon / emoji
-            <input id="itemIcon" class="text-input" type="text" maxlength="4" placeholder="🍗" />
+            Food type
+            <select id="itemFoodType" class="text-input" required>
+              <option value="veg">🟢 Veg</option>
+              <option value="non_veg">🔴 Non-Veg</option>
+            </select>
           </label>
         </div>
         <datalist id="categoryOptions"></datalist>

@@ -1,17 +1,17 @@
 const MENU_STORAGE_KEY = "restaurantMenu";
 const DEFAULT_MENU = [
-  { id: 1, name: "Chicken Biriyani", category: "Main Course", price: 180, icon: "🍗" },
-  { id: 2, name: "Mutton Biriyani", category: "Main Course", price: 240, icon: "🍖" },
-  { id: 3, name: "Fish Curry", category: "Main Course", price: 150, icon: "🐟" },
-  { id: 4, name: "Chicken 65", category: "Starters", price: 140, icon: "🍗" },
-  { id: 5, name: "Paneer 65", category: "Starters", price: 130, icon: "🧀" },
-  { id: 6, name: "Veg Meals", category: "Meals", price: 120, icon: "🍛" },
-  { id: 7, name: "Parotta", category: "Breads", price: 25, icon: "🥞" },
-  { id: 8, name: "Chapati", category: "Breads", price: 30, icon: "🫓" },
-  { id: 9, name: "Curd Rice", category: "Meals", price: 80, icon: "🍚" },
-  { id: 10, name: "Fresh Lime", category: "Drinks", price: 50, icon: "🍋" },
-  { id: 11, name: "Coke", category: "Drinks", price: 40, icon: "🥤" },
-  { id: 12, name: "Water Bottle", category: "Drinks", price: 20, icon: "💧" }
+  { id: 1, name: "Chicken Biriyani", category: "Main Course", price: 180, food_type: "non_veg" },
+  { id: 2, name: "Mutton Biriyani", category: "Main Course", price: 240, food_type: "non_veg" },
+  { id: 3, name: "Fish Curry", category: "Main Course", price: 150, food_type: "non_veg" },
+  { id: 4, name: "Chicken 65", category: "Starters", price: 140, food_type: "non_veg" },
+  { id: 5, name: "Paneer 65", category: "Starters", price: 130, food_type: "veg" },
+  { id: 6, name: "Veg Meals", category: "Meals", price: 120, food_type: "veg" },
+  { id: 7, name: "Parotta", category: "Breads", price: 25, food_type: "veg" },
+  { id: 8, name: "Chapati", category: "Breads", price: 30, food_type: "veg" },
+  { id: 9, name: "Curd Rice", category: "Meals", price: 80, food_type: "veg" },
+  { id: 10, name: "Fresh Lime", category: "Drinks", price: 50, food_type: "veg" },
+  { id: 11, name: "Coke", category: "Drinks", price: 40, food_type: "veg" },
+  { id: 12, name: "Water Bottle", category: "Drinks", price: 20, food_type: "veg" }
 ];
 
 const supabaseConfig = window.SUPABASE_CONFIG || {};
@@ -36,7 +36,7 @@ async function loadMenu() {
 
   const { data, error } = await supabaseClient
     .from("menu_items")
-    .select("id,name,category,price,icon,is_active")
+    .select("id,name,category,price,food_type,is_active")
     .eq("restaurant_id", window.RESTAURANT_ID)
     .order("name");
 
@@ -69,7 +69,7 @@ async function saveMenuItem(item) {
     name: item.name,
     category: item.category,
     price: item.price,
-    icon: item.icon,
+    food_type: item.food_type,
     is_active: true
   };
 
@@ -80,13 +80,13 @@ async function saveMenuItem(item) {
       .update(payload)
       .eq("id", item.id)
       .eq("restaurant_id", window.RESTAURANT_ID)
-      .select("id,name,category,price,icon,is_active")
+      .select("id,name,category,price,food_type,is_active")
       .single();
   } else {
     result = await supabaseClient
       .from("menu_items")
       .insert(payload)
-      .select("id,name,category,price,icon,is_active")
+      .select("id,name,category,price,food_type,is_active")
       .single();
   }
 
@@ -159,7 +159,7 @@ function renderTable() {
         <tr>
           <th>Item</th>
           <th>Category</th>
-          <th>Price</th>
+          <th>Food Type</th>\n          <th>Price</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -168,7 +168,7 @@ function renderTable() {
           <tr>
             <td>
               <div class="managed-item">
-                <span class="managed-icon">${escapeHtml(item.icon || "🍽️")}</span>
+                <span class="managed-icon" title="${item.food_type === "non_veg" ? "Non-Veg" : "Veg"}">${item.food_type === "non_veg" ? "🔴" : "🟢"}</span>
                 <strong>${escapeHtml(item.name)}</strong>
               </div>
             </td>
@@ -199,7 +199,7 @@ function openAddItem() {
   $("itemForm").reset();
   $("itemId").value = "";
   $("itemModalTitle").textContent = "Add New Item";
-  $("itemIcon").value = "🍽️";
+  $("itemFoodType").value = "veg";
   $("itemModal").classList.remove("hidden");
   $("itemName").focus();
 }
@@ -212,7 +212,7 @@ function openEditItem(id) {
   $("itemName").value = item.name;
   $("itemCategory").value = item.category;
   $("itemPrice").value = item.price;
-  $("itemIcon").value = item.icon || "🍽️";
+  $("itemFoodType").value = item.food_type || "veg";
   $("itemModalTitle").textContent = "Edit Menu Item";
   $("itemModal").classList.remove("hidden");
   $("itemName").focus();
@@ -229,14 +229,14 @@ async function saveItem(event) {
   const name = $("itemName").value.trim();
   const category = $("itemCategory").value.trim();
   const price = Number($("itemPrice").value);
-  const icon = $("itemIcon").value.trim() || "🍽️";
+  const food_type = $("itemFoodType").value;
 
   if (!name || !category || !Number.isFinite(price) || price <= 0) {
     alert("Please enter a valid item name, category and price.");
     return;
   }
 
-  const item = { id: id || null, name, category, price, icon };
+  const item = { id: id || null, name, category, price, food_type };
   const saved = await saveMenuItem(item);
   if (!saved) return;
 
