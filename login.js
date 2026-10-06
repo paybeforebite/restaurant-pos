@@ -1,4 +1,62 @@
-const c=window.SUPABASE_CONFIG||{},s=window.supabase&&c.url&&c.publishableKey?window.supabase.createClient(c.url,c.publishableKey):null;
-const f=document.getElementById("loginForm"),e=document.getElementById("loginEmail"),p=document.getElementById("loginPassword"),b=document.getElementById("loginButton"),m=document.getElementById("loginMessage");
-const allowedNext=["platform-dashboard.html","customers.html","subscriptions.html","analytics.html","settings.html"];\nconst requestedNext=new URLSearchParams(window.location.search).get("next");\nconst nextPage=allowedNext.includes(requestedNext)?requestedNext:"index.html";
-f.addEventListener("submit",async x=>{x.preventDefault();b.disabled=true;b.textContent="Signing in...";m.textContent="";try{if(!s)throw new Error("Supabase is not configured.");const{error}=await s.auth.signInWithPassword({email:e.value.trim(),password:p.value});if(error)throw error;location.replace(nextPage)}catch(x){m.textContent=x.message||"Unable to sign in."}finally{b.disabled=false;b.textContent="Sign In"}});
+const config = window.SUPABASE_CONFIG || {};
+const client =
+  window.supabase && config.url && config.publishableKey
+    ? window.supabase.createClient(config.url, config.publishableKey)
+    : null;
+
+const form = document.getElementById("loginForm");
+const emailInput = document.getElementById("loginEmail");
+const passwordInput = document.getElementById("loginPassword");
+const loginButton = document.getElementById("loginButton");
+const message = document.getElementById("loginMessage");
+
+const allowedNext = [
+  "platform-dashboard.html",
+  "customers.html",
+  "subscriptions.html",
+  "analytics.html",
+  "settings.html",
+  "index.html",
+  "dashboard.html",
+  "menu.html",
+  "restaurant-customers.html",
+  "staff.html",
+  "reports.html",
+  "profile.html",
+  "subscription.html"
+];
+
+const requestedNext = new URLSearchParams(window.location.search).get("next");
+const nextPage = allowedNext.includes(requestedNext)
+  ? requestedNext
+  : "index.html";
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  loginButton.disabled = true;
+  loginButton.textContent = "Signing in...";
+  message.textContent = "";
+
+  try {
+    if (!client) {
+      throw new Error("Supabase is not configured.");
+    }
+
+    const { error } = await client.auth.signInWithPassword({
+      email: emailInput.value.trim(),
+      password: passwordInput.value
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    window.location.replace(nextPage);
+  } catch (error) {
+    message.textContent = error?.message || "Unable to sign in.";
+  } finally {
+    loginButton.disabled = false;
+    loginButton.textContent = "Sign In";
+  }
+});
