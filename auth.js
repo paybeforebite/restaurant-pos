@@ -37,7 +37,8 @@ function redirectToLogin(){
   if(page==="index.html") return;
   const allowedNext=[...PLATFORM_PAGES,...RESTAURANT_PAGES];
   const next=allowedNext.includes(page)?page:"dashboard.html";
-  window.location.replace("index.html?next="+encodeURIComponent(next));
+  sessionStorage.setItem("paybeforebite_requested_page", next);
+  window.location.replace("index.html");
 }
 
 function redirectAfterDenied(){
