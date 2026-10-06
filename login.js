@@ -52,7 +52,25 @@ form.addEventListener("submit", async (event) => {
       throw error;
     }
 
-    window.location.replace(nextPage);
+    if (requestedNext) {
+      window.location.replace(nextPage);
+      return;
+    }
+
+    const { data: platformAdmin, error: platformError } = await client
+      .from("platform_admins")
+      .select("user_id")
+      .eq("user_id", data.user.id)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (platformError) {
+      throw platformError;
+    }
+
+    window.location.replace(
+      platformAdmin ? "platform-dashboard.html" : "dashboard.html"
+    );
   } catch (error) {
     message.textContent = error?.message || "Unable to sign in.";
   } finally {
