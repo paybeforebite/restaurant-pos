@@ -16,9 +16,17 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
   const url = Deno.env.get("SUPABASE_URL");
-  const publishableKey = Deno.env.get("SUPABASE_PUBLISHABLE_KEY");
-  const secretKey = Deno.env.get("SUPABASE_SECRET_KEY");
-  if (!url || !publishableKey || !secretKey) return json({ error: "Function secrets are not configured." }, 500);
+  const publishableKeysRaw = Deno.env.get("SUPABASE_PUBLISHABLE_KEYS");
+  const secretKeysRaw = Deno.env.get("SUPABASE_SECRET_KEYS");
+  const publishableKey = publishableKeysRaw
+    ? JSON.parse(publishableKeysRaw).default
+    : Deno.env.get("SUPABASE_PUBLISHABLE_KEY");
+  const secretKey = secretKeysRaw
+    ? JSON.parse(secretKeysRaw).default
+    : Deno.env.get("SUPABASE_SECRET_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !publishableKey || !secretKey) {
+    return json({ error: "Supabase function secrets are not configured." }, 500);
+  }
 
   const authHeader = req.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) return json({ error: "Authentication required." }, 401);

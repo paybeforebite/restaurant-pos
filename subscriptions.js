@@ -129,7 +129,18 @@ form.addEventListener("submit", async (event) => {
   }
 });
 
-document.getElementById("refreshSubscriptionsBtn").addEventListener("click", loadSubscriptions);
+const refreshButton = document.getElementById("refreshSubscriptionsBtn");
+refreshButton.addEventListener("click", async () => {
+  refreshButton.disabled = true;
+  refreshButton.textContent = "Refreshing...";
+  message.className = "login-message";
+  try {
+    await loadSubscriptions();
+  } finally {
+    refreshButton.disabled = false;
+    refreshButton.textContent = "Refresh";
+  }
+});
 document.getElementById("closeSubscriptionModal").addEventListener("click", closeModal);
 document.getElementById("cancelSubscriptionBtn").addEventListener("click", closeModal);
 modal.addEventListener("click", (event) => {

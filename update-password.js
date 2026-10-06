@@ -50,7 +50,7 @@ form.addEventListener("submit", async (event) => {
     message.className = "login-message success";
     message.textContent = "Password updated successfully. Redirecting to sign in...";
     form.reset();
-    setTimeout(() => window.location.replace("login.html"), 1200);
+    setTimeout(() => window.location.replace("index.html"), 1200);
   } catch (error) {
     message.textContent = error.message || "Unable to update the password.";
   } finally {
