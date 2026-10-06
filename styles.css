@@ -293,7 +293,9 @@ h2 { margin-bottom: 5px; font-size: 19px; }
 body:not(.sidebar-expanded) .topbar,
 body:not(.sidebar-expanded) .workspace,
 body:not(.sidebar-expanded) .dashboard-shell,
-body:not(.sidebar-expanded) .management-page,\nbody:not(.sidebar-expanded) .platform-page,\nbody:not(.sidebar-expanded) .customer-admin-page { margin-left: 70px; }
+body:not(.sidebar-expanded) .management-page,
+body:not(.sidebar-expanded) .platform-page,
+body:not(.sidebar-expanded) .customer-admin-page { margin-left: 70px; }
 
 @media (max-width: 760px) {
   .app-sidebar {
