@@ -41,12 +41,14 @@ function redirectToLogin(){
   window.location.replace("index.html");
 }
 
-function redirectAfterDenied(){
-  if(window.IS_PLATFORM_ADMIN){
-    window.location.replace("platform-dashboard.html");
-  }else{
-    window.location.replace("dashboard.html");
+async function denyRouteAccess(){
+  // Never expose a protected page after a direct/unauthorized URL attempt.
+  // Clear the session and force the user through the login page again.
+  if(client){
+    try{ await client.auth.signOut(); }catch(_){}
   }
+  sessionStorage.removeItem("paybeforebite_requested_page");
+  window.location.replace("index.html");
 }
 
 async function loadRestaurantSession(){
@@ -76,7 +78,7 @@ async function loadRestaurantSession(){
 
   // Platform routes are restricted to active platform administrators.
   if(PLATFORM_PAGES.includes(page)&&!window.IS_PLATFORM_ADMIN){
-    redirectAfterDenied();
+    await denyRouteAccess();
     return null;
   }
 
@@ -100,7 +102,7 @@ async function loadRestaurantSession(){
       document.querySelectorAll("[data-restaurant-name]").forEach(e=>e.textContent="PayBeforeBite Admin");
 
       if(!PLATFORM_PAGES.includes(page)){
-        window.location.replace("platform-dashboard.html");
+        await denyRouteAccess();
         return null;
       }
       return session;
@@ -122,7 +124,7 @@ async function loadRestaurantSession(){
   // Restaurant routes require an active restaurant membership.
   if(RESTAURANT_PAGES.includes(page)){
     if(OWNER_ADMIN_PAGES.includes(page)&&!["owner","admin"].includes(window.RESTAURANT_ROLE)){
-      redirectAfterDenied();
+      await denyRouteAccess();
       return null;
     }
   }
