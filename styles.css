@@ -363,7 +363,7 @@ body:not(.sidebar-expanded) .customer-admin-page { margin-left: 70px; }
 
 
 /* Profile */
-.profile-page { padding: 22px; max-width: 1100px; margin: auto; }
+.profile-page { padding: 22px; width: calc(100% - 238px); max-width: none; margin: 0 0 0 238px; transition: margin-left .22s ease, width .22s ease; }\nbody:not(.sidebar-expanded) .profile-page { width: calc(100% - 60px); margin-left: 60px; }
 .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .profile-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); padding: 24px; }
 .profile-summary { grid-column: 1 / -1; display: flex; align-items: center; gap: 18px; }
@@ -388,7 +388,7 @@ body:not(.sidebar-expanded) .customer-admin-page { margin-left: 70px; }
 .login-message.success { color: var(--success); }
 
 @media (max-width: 760px) {
-  .profile-page { padding: 12px; }
+  .profile-page { padding: 12px; }\n  body:not(.sidebar-expanded) .profile-page { width: 100%; margin-left: 0; }
   .profile-grid { grid-template-columns: 1fr; }
   .profile-summary { grid-column: auto; }
   .profile-details div { align-items: flex-start; flex-direction: column; gap: 4px; }
