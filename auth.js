@@ -2,12 +2,50 @@ const config=window.SUPABASE_CONFIG||{};
 const client=window.supabase&&config.url&&config.publishableKey?window.supabase.createClient(config.url,config.publishableKey):null;
 window.SUPABASE_CLIENT=client;
 
+const PLATFORM_PAGES=[
+  "platform-dashboard.html",
+  "customers.html",
+  "subscriptions.html",
+  "analytics.html",
+  "settings.html"
+];
+
+const RESTAURANT_PAGES=[
+  "dashboard.html",
+  "billing.html",
+  "menu.html",
+  "restaurant-customers.html",
+  "staff.html",
+  "reports.html",
+  "profile.html",
+  "subscription.html"
+];
+
+const OWNER_ADMIN_PAGES=[
+  "menu.html",
+  "restaurant-customers.html",
+  "staff.html",
+  "subscription.html"
+];
+
+function currentPage(){
+  return window.location.pathname.split("/").pop()||"index.html";
+}
+
 function redirectToLogin(){
-  if(window.location.pathname.endsWith("index.html")) return;
-  const page=window.location.pathname.split("/").pop()||"index.html";
-  const platformPages=["platform-dashboard.html","customers.html","subscriptions.html","analytics.html","settings.html"];
-  const next=platformPages.includes(page)?page:"dashboard.html";
+  const page=currentPage();
+  if(page==="index.html") return;
+  const allowedNext=[...PLATFORM_PAGES,...RESTAURANT_PAGES];
+  const next=allowedNext.includes(page)?page:"dashboard.html";
   window.location.replace("index.html?next="+encodeURIComponent(next));
+}
+
+function redirectAfterDenied(){
+  if(window.IS_PLATFORM_ADMIN){
+    window.location.replace("platform-dashboard.html");
+  }else{
+    window.location.replace("dashboard.html");
+  }
 }
 
 async function loadRestaurantSession(){
@@ -33,14 +71,16 @@ async function loadRestaurantSession(){
     location.replace("index.html");
   }));
 
-  const currentPage=window.location.pathname.split("/").pop()||"index.html";
-  const platformPages=["platform-dashboard.html","customers.html","subscriptions.html","analytics.html","settings.html"];
+  const page=currentPage();
 
-  if(platformPages.includes(currentPage)&&!window.IS_PLATFORM_ADMIN){
-    window.location.replace("index.html");
+  // Platform routes are restricted to active platform administrators.
+  if(PLATFORM_PAGES.includes(page)&&!window.IS_PLATFORM_ADMIN){
+    redirectAfterDenied();
     return null;
   }
 
+  // A platform-only account should not enter restaurant routes unless it also
+  // has an active restaurant membership.
   const {data:m,error:me}=await client
     .from("restaurant_members")
     .select("restaurant_id,role,restaurants(name,slug)")
@@ -57,7 +97,8 @@ async function loadRestaurantSession(){
       window.RESTAURANT_NAME="PayBeforeBite Admin";
       document.querySelectorAll("[data-user-email]").forEach(e=>e.textContent=session.user.email||"");
       document.querySelectorAll("[data-restaurant-name]").forEach(e=>e.textContent="PayBeforeBite Admin");
-      if(!platformPages.includes(currentPage)){
+
+      if(!PLATFORM_PAGES.includes(page)){
         window.location.replace("platform-dashboard.html");
         return null;
       }
@@ -65,7 +106,8 @@ async function loadRestaurantSession(){
     }
 
     await client.auth.signOut();
-    throw new Error("Your account is not assigned to a restaurant. Please contact the administrator.");
+    window.location.replace("index.html");
+    return null;
   }
 
   window.RESTAURANT_ID=m.restaurant_id;
@@ -75,6 +117,14 @@ async function loadRestaurantSession(){
   document.querySelectorAll("[data-user-email]").forEach(e=>e.textContent=session.user.email||"");
   document.querySelectorAll("[data-restaurant-name]").forEach(e=>e.textContent=window.RESTAURANT_NAME);
   document.querySelectorAll("[data-platform-admin]").forEach(e=>e.style.display=window.IS_PLATFORM_ADMIN?"flex":"none");
+
+  // Restaurant routes require an active restaurant membership.
+  if(RESTAURANT_PAGES.includes(page)){
+    if(OWNER_ADMIN_PAGES.includes(page)&&!["owner","admin"].includes(m.role)){
+      redirectAfterDenied();
+      return null;
+    }
+  }
 
   return session;
 }
